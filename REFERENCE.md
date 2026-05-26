@@ -61,8 +61,8 @@ svg.diagram { display: block; width: 100%; height: auto; }
 | white | default panel / decision | `#ffffff` | `var(--gray-300)` 1.5px |
 
 ### Shape rules
-- All `<rect>` use `rx="10"` — no exceptions
-- Terminal / pill shapes: `rx="22"` (start/end nodes)
+- Default: all `<rect>` use `rx="10"`
+- Terminal / pill shapes (start/end nodes): `rx="22"` — overrides the default
 - Decision diamonds: `<path d="M cx,y1 L x2,cy L cx,y3 L x1,cy Z"/>`
 - Stroke widths: **1.5px** neutral, **2px** emphasized (containers, current step)
 - **No drop shadows. No gradients. No images.**
@@ -153,7 +153,7 @@ Sequence diagram:
 
 ## § Interactive pattern (opt-in)
 
-Only add when user explicitly asks for "带交互" / "可点击".
+Only add when user explicitly asks for "带交互" / "可点击" / "interactive" / "clickable" / "with panel".
 
 ### Layout CSS addition
 ```css
@@ -177,9 +177,9 @@ aside pre {
   background: var(--gray-150); border: 1px solid var(--gray-300);
   border-radius: 8px; padding: 10px 12px; white-space: pre-wrap; color: var(--slate);
 }
-.node { cursor: pointer; transition: transform 120ms ease; }
+.node { cursor: pointer; transition: transform 120ms ease; pointer-events: all; }
 .node:hover { transform: translateY(-1px); }
-.node.active rect, .node.active path { stroke: var(--clay); stroke-width: 2; }
+.node.active rect:not(.hit), .node.active path { stroke: var(--clay); stroke-width: 2; }
 ```
 
 ### HTML structure
@@ -188,7 +188,15 @@ aside pre {
   <div>
     <div class="canvas">
       <svg class="diagram" viewBox="0 0 [W] [H]">
-        <!-- each node: <g class="node" data-k="slug"> ... </g> -->
+        <!-- each node pattern:
+          <g class="node" data-k="slug">
+            <rect class="hit" x="[x]" y="[y]" width="[w]" height="[h]"
+                  fill="transparent" pointer-events="all"/>
+            <rect x="[x]" y="[y]" width="[w]" height="[h]" rx="10" fill="..." stroke="..."/>
+            <text ...>[Label]</text>
+          </g>
+          The .hit rect MUST match the visible rect's x/y/width/height exactly.
+        -->
       </svg>
     </div>
   </div>
@@ -221,14 +229,68 @@ nodes.forEach(n => {
     if (!d) return;
     T.textContent = d.title;
     M.textContent = d.meta;
-    B.innerHTML = d.body;
+    B.innerHTML = d.body.replace(/\n/g, "<br>");  // body is AI-authored, not user input
     C.textContent = d.code;
   });
 });
 // activate first node by default
-nodes[0] && nodes[0].click();
+if (nodes[0]) nodes[0].dispatchEvent(new MouseEvent('click', {bubbles:true}));
 </script>
 ```
+
+---
+
+## § JavaScript safety rules (interactive variant)
+
+### Serializing data with CJK or special characters
+**Always use `json.dumps()` — never hand-write JS string literals containing `"` or `\`.**
+
+```python
+import json
+# Produces a valid JS string literal — handles ", \, newlines, CJK, emoji
+json.dumps(value, ensure_ascii=False)
+# e.g. json.dumps('用户说"确认"') → '"用户说\\"确认\\""'
+```
+
+Wrong (breaks JS when value contains `"`):
+```js
+body:"用户说"确认"，继续执行"  // ← SyntaxError
+```
+Right:
+```js
+body:"用户说\"确认\"，继续执行"  // ← escaped by json.dumps
+```
+
+### SVG `<g>` click events
+SVG `<g>` elements do **not** support `.click()` (HTML-only method).
+
+```js
+// ✗ Wrong — silently fails on SVG elements
+nodes[0].click();
+
+// ✓ Correct
+nodes[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));
+```
+
+**Making the full node area clickable** requires a transparent hit rect — `pointer-events: all` on `<g>` alone is not enough (empty areas still miss clicks):
+
+```xml
+<!-- Inside each <g class="node" data-k="..."> — add as FIRST child -->
+<rect class="hit" x="[same as visible rect]" y="[same]" width="[same]" height="[same]"
+      fill="transparent" pointer-events="all"/>
+```
+
+The hit rect **must** match the visible rect's `x/y/width/height` exactly.
+The `.node.active` CSS selector uses `:not(.hit)` to avoid stroking the invisible rect.
+
+### `</script>` in inline data
+`json.dumps()` does **not** escape `</script>`. If any data value could contain that string, add a replace:
+
+```python
+json.dumps(value, ensure_ascii=False).replace('</script>', '<\\/script>')
+```
+
+In practice, DETAIL values are AI-authored constants (not user input), so the risk is near-zero. But be aware of it.
 
 ---
 
@@ -240,3 +302,7 @@ nodes[0] && nodes[0].click();
 - [ ] No external resources
 - [ ] `<defs>` contains arrowhead markers if edges present
 - [ ] Filename inferred from topic in snake-case or kebab-case
+- [ ] **If interactive:** JS data serialized with `json.dumps()` — no raw `"` inside string literals
+- [ ] **If interactive:** SVG nodes use `dispatchEvent` not `.click()`
+- [ ] **If interactive:** each `<g class="node">` has a `.hit` rect as first child (same x/y/w/h as visible rect)
+- [ ] **If interactive:** `.node.active` CSS selector uses `rect:not(.hit)` to avoid stroking the hit rect

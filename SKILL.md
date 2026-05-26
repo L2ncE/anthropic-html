@@ -12,8 +12,34 @@ Generate a beautiful, self-contained HTML diagram in Anthropic's visual style.
 1. Infer diagram type from user description → see type table below
 2. Infer filename from topic (e.g. "登录流程" → `login-flow.html`), write to CWD unless user specifies
 3. Write HTML with inline SVG using tokens from [REFERENCE.md](REFERENCE.md)
-4. **Default: static SVG.** Only add interactive aside panel when user says "带交互" / "可点击" / "加说明"
-5. Open in browser with `gstack` skill to verify — fix overlaps by adjusting viewBox + coordinates
+4. **Default: static SVG.** Only add interactive aside panel when user says "带交互" / "可点击" / "interactive" / "clickable" / "with panel"
+5. **Open in browser + verify (always run this step)**
+   - Use `mcp__chrome-devtools__*` tools to open the file; fallback to any other available browser MCP tool
+   - **Static verify (all diagrams):** call `take_snapshot` (confirm header/svg/canvas nodes present) + `take_screenshot` (visually check: no node/label overlap, no clipping, viewBox padding ≥ 40px, no unexpected horizontal scroll). Fix issues by adjusting viewBox + coordinates.
+   - **Interactive variant only (`<script>` block present):**
+     1. Call `list_console_messages` — check for `error`-level entries
+     2. Run behavior check via `evaluate_script`:
+        - Click node index 0 → assert `p-title` text is non-empty
+        - If ≥2 nodes exist: click node index 1 → assert `p-title` text changed from step above
+        - Assert at least one node has class `active`
+     3. If any check fails → analyse, fix HTML, reload, re-run checks. Repeat up to **2 times**
+     4. If still failing after 2 retries → report to user and stop
+   - **If no browser tool is available:**
+     ```bash
+     python3 -c "
+     import re, sys, tempfile, subprocess, pathlib
+     html = pathlib.Path('FILE').read_text()
+     m = re.search(r'<script>(.*?)</script>', html, re.DOTALL)
+     if not m: sys.exit(0)
+     fd, tmp = tempfile.mkstemp(suffix='.js')
+     import os; os.close(fd)
+     pathlib.Path(tmp).write_text(m.group(1))
+     r = subprocess.run(['node', '--check', tmp])
+     os.unlink(tmp)
+     sys.exit(r.returncode)
+     " && echo 'JS syntax OK'
+     ```
+     Replace `FILE` with the actual HTML path. If node is also unavailable → skip lint, warn user to check browser console manually.
 
 ## Diagram types
 
@@ -23,6 +49,11 @@ Generate a beautiful, self-contained HTML diagram in Anthropic's visual style.
 | Module / dependency | Left-right or grid: labeled boxes + directional arrows |
 | Architecture | Swimlane columns per layer, boxes inside, connecting lines |
 | Sequence | Vertical lifelines, horizontal labeled arrows, time flows down |
+
+**Disambiguation rule** (when description matches multiple types):
+- "层 / layer / 系统边界 / service boundary / 服务关系" → Architecture
+- "消息 / message / 往返 / request-response / 时间顺序 / timeline" → Sequence
+- Still ambiguous → ask 1 clarifying question before writing
 
 ## HTML skeleton
 
@@ -56,7 +87,7 @@ Each node gets `data-k="slug"`. JS updates aside on click.
 
 - No external fonts, images, or scripts
 - Edges drawn before nodes in SVG source (z-order)
-- Label node interiors with 11px mono; annotate outside with 12px sans `--gray-500`
-- `rx="10"` on all rects; `rx="22"` only on terminal/pill shapes
+- Label node interiors with 12px mono; annotate outside with 12px sans `--gray-500`
+- Default `rx="10"` on rects; terminal/pill shapes use `rx="22"` (overrides default)
 - Stroke: 1.5px neutral, 2px emphasized containers
 - No shadows, no gradients
