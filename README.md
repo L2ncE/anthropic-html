@@ -1,5 +1,7 @@
 # anthropic-html
 
+[中文文档](README_zh.md)
+
 A [Claude Code](https://claude.ai/code) skill for generating Anthropic-style standalone HTML diagram files — flowcharts, module diagrams, architecture diagrams, and sequence diagrams.
 
 Built on the design patterns from [anthropic/html-effectiveness](https://github.com/anthropics/anthropic-quickstarts/tree/main/html-effectiveness): hand-crafted inline SVG, Anthropic design tokens, zero dependencies, no build step.
