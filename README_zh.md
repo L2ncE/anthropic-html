@@ -1,6 +1,16 @@
+<div align="center">
+
 # anthropic-html
 
-[English](README.md)
+生成 Anthropic 风格的独立 HTML 图表文件，支持流程图、模块图、架构图和时序图。
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-D97757.svg)](https://claude.ai/code)
+[![English](https://img.shields.io/badge/docs-English-788C5D.svg)](README.md)
+
+</div>
+
+---
 
 一个用于生成 Anthropic 风格独立 HTML 图表文件的 [Claude Code](https://claude.ai/code) Skill，支持流程图、模块图、架构图和时序图。
 

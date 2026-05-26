@@ -1,8 +1,16 @@
+<div align="center">
+
 # anthropic-html
 
-[Chinese](README_zh.md)
+Generate Anthropic-style standalone HTML diagrams — flowcharts, module diagrams, architecture diagrams, and sequence diagrams.
 
-A [Claude Code](https://claude.ai/code) skill for generating Anthropic-style standalone HTML diagram files — flowcharts, module diagrams, architecture diagrams, and sequence diagrams.
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-D97757.svg)](https://claude.ai/code)
+[![中文文档](https://img.shields.io/badge/文档-中文-788C5D.svg)](README_zh.md)
+
+</div>
+
+---
 
 Built on the design patterns from [anthropic/html-effectiveness](https://github.com/anthropics/anthropic-quickstarts/tree/main/html-effectiveness): hand-crafted inline SVG, Anthropic design tokens, zero dependencies, no build step.
 
@@ -14,8 +22,6 @@ Built on the design patterns from [anthropic/html-effectiveness](https://github.
 - Works in any browser — nothing to install
 
 ## Installation
-
-Copy `SKILL.md` and `REFERENCE.md` into your Claude Code skills directory:
 
 ```bash
 git clone git@github.com:L2ncE/anthropic-html.git ~/.claude/skills/anthropic-html
