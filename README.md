@@ -1,6 +1,6 @@
 # anthropic-html
 
-[中文文档](README_zh.md)
+[Chinese](README_zh.md)
 
 A [Claude Code](https://claude.ai/code) skill for generating Anthropic-style standalone HTML diagram files — flowcharts, module diagrams, architecture diagrams, and sequence diagrams.
 
@@ -26,9 +26,9 @@ git clone git@github.com:L2ncE/anthropic-html.git ~/.claude/skills/anthropic-htm
 Invoke explicitly when you need a diagram:
 
 ```
-画一个用户登录流程图
-画一个微服务架构图，带交互
-帮我画这个模块的依赖关系图，输出到 ./docs/arch.html
+Draw a user login flowchart
+Draw a microservice architecture diagram, with interactive nodes
+Draw the dependency graph for this module, save to ./docs/arch.html
 ```
 
 Claude will infer the diagram type, pick a filename from the topic, and write the file to your current working directory.
