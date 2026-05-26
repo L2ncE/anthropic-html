@@ -10,9 +10,9 @@ Generate Anthropic-style standalone HTML diagrams — flowcharts, module diagram
 
 </div>
 
----
+Built on the design patterns from [ThariqS/html-effectiveness](https://github.com/ThariqS/html-effectiveness): hand-crafted inline SVG, Anthropic design tokens, zero dependencies, no build step.
 
-Built on the design patterns from [anthropic/html-effectiveness](https://github.com/anthropics/anthropic-quickstarts/tree/main/html-effectiveness): hand-crafted inline SVG, Anthropic design tokens, zero dependencies, no build step.
+![html-effectiveness workflow](workflow-example.png)
 
 ## What it produces
 

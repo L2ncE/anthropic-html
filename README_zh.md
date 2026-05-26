@@ -10,11 +10,11 @@
 
 </div>
 
----
-
 一个用于生成 Anthropic 风格独立 HTML 图表文件的 [Claude Code](https://claude.ai/code) Skill，支持流程图、模块图、架构图和时序图。
 
-基于 [anthropic/html-effectiveness](https://github.com/anthropics/anthropic-quickstarts/tree/main/html-effectiveness) 的设计模式：手写内联 SVG、Anthropic design tokens、零依赖、无需构建。
+基于 [ThariqS/html-effectiveness](https://github.com/ThariqS/html-effectiveness) 的设计模式：手写内联 SVG、Anthropic design tokens、零依赖、无需构建。
+
+![html-effectiveness workflow](workflow-example.png)
 
 ## 产物示例
 
